@@ -8,17 +8,18 @@ import { Plus, Search } from 'lucide-react';
 import ProductTable from '../../../components/admin/ProductTable';
 import Loading from '../../../components/ui/Loading';
 import Button from '../../../components/ui/Button';
-import Input from '../../../components/ui/Input';
 import { IProduct } from '../../../types/product';
 import toast from 'react-hot-toast';
 
 export default function AdminProductsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+
   const [products, setProducts] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Redirect based on authentication
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
@@ -31,6 +32,7 @@ export default function AdminProductsPage() {
     }
   }, [status, session]);
 
+  // Fetch products
   const fetchProducts = async () => {
     setLoading(true);
     try {
@@ -38,7 +40,13 @@ export default function AdminProductsPage() {
       const data = await res.json();
 
       if (data.success) {
-        setProducts(data.products);
+        // Sanitize products to ensure name/category exist
+        const validProducts = data.products.filter(
+          (p: IProduct) => p && p.name && p.category
+        );
+        setProducts(validProducts);
+      } else {
+        toast.error(data.error || 'Failed to load products');
       }
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -48,10 +56,12 @@ export default function AdminProductsPage() {
     }
   };
 
+  // Handle product edit
   const handleEdit = (product: IProduct) => {
     router.push(`/admin/add-product?id=${product._id}`);
   };
 
+  // Handle product delete
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this product?')) {
       return;
@@ -76,16 +86,20 @@ export default function AdminProductsPage() {
     }
   };
 
-  const filteredProducts = products.filter(
-    (product) =>
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filtered products — with safe chaining
+  const filteredProducts = products.filter((product) => {
+    const name = product.name?.toLowerCase() || '';
+    const category = product.category?.toLowerCase() || '';
+    const query = searchQuery.toLowerCase();
+    return name.includes(query) || category.includes(query);
+  });
 
+  // Loading state
   if (status === 'loading' || loading) {
     return <Loading text="Loading products..." />;
   }
 
+  // Not admin or not logged in
   if (!session || session.user.role !== 'admin') {
     return null;
   }

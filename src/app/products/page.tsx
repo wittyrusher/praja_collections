@@ -52,7 +52,7 @@ export default function ProductsPage() {
           <CategoryFilter />
 
           {/* Price Filter */}
-          <div className="bg-white p-4 rounded-lg shadow-md mt-4">
+          <div className="bg-gray-900 p-4 rounded-lg shadow-md mt-4">
             <h3 className="font-semibold text-lg mb-4">Price Range</h3>
             <div className="space-y-2">
               <label className="flex items-center space-x-2">

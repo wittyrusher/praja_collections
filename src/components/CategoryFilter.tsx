@@ -22,7 +22,7 @@ export default function CategoryFilter() {
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-md">
+    <div className="bg-gray-900 p-4 rounded-lg shadow-md">
       <h3 className="font-semibold text-lg mb-4">Categories</h3>
       <div className="space-y-2">
         <button
@@ -30,7 +30,7 @@ export default function CategoryFilter() {
           className={`w-full text-left px-4 py-2 rounded-lg transition ${
             !currentCategory
               ? 'bg-primary-600 text-white'
-              : 'hover:bg-gray-100'
+              : 'hover:bg-black'
           }`}
         >
           All Products
@@ -42,7 +42,7 @@ export default function CategoryFilter() {
             className={`w-full text-left px-4 py-2 rounded-lg transition ${
               currentCategory === category.slug
                 ? 'bg-primary-600 text-white'
-                : 'hover:bg-gray-100'
+                : 'hover:bg-black'
             }`}
           >
             {category.name}

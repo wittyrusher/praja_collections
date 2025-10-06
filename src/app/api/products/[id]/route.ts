@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '../../../../lib/db';
-import Product from '../../../../models/Product';
+import connectDB from '@/lib/db';
+import Product from '@/models/Product';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../../../lib/auth';
+import { authOptions } from '@/lib/auth';
 
-// GET: Fetch single product
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -12,7 +11,7 @@ export async function GET(
   try {
     await connectDB();
 
-    const product = await Product.findById(params.id);
+    const product = await Product.findById(params.id).lean().exec();
 
     if (!product) {
       return NextResponse.json(
@@ -30,7 +29,6 @@ export async function GET(
   }
 }
 
-// PUT: Update product (Admin only)
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -48,11 +46,12 @@ export async function PUT(
     await connectDB();
 
     const body = await request.json();
+    
     const product = await Product.findByIdAndUpdate(
       params.id,
       body,
       { new: true, runValidators: true }
-    );
+    ).lean().exec();
 
     if (!product) {
       return NextResponse.json(
@@ -70,7 +69,6 @@ export async function PUT(
   }
 }
 
-// DELETE: Delete product (Admin only)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -87,7 +85,7 @@ export async function DELETE(
 
     await connectDB();
 
-    const product = await Product.findByIdAndDelete(params.id);
+    const product = await Product.findByIdAndDelete(params.id).lean().exec();
 
     if (!product) {
       return NextResponse.json(
