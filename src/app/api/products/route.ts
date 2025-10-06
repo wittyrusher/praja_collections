@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '../../../lib/db';
-import Product from '../../../models/Product';
+import connectDB from '@/lib/db';
+import Product from '@/models/Product';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../../lib/auth';
+import { authOptions } from '@/lib/auth';
 
-// GET: Fetch all products with filters
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
@@ -18,7 +17,6 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
     const page = parseInt(searchParams.get('page') || '1');
 
-    // Build filter object
     const filter: any = {};
 
     if (category) {
@@ -44,7 +42,9 @@ export async function GET(request: NextRequest) {
     const products = await Product.find(filter)
       .sort({ createdAt: -1 })
       .limit(limit)
-      .skip(skip);
+      .skip(skip)
+      .lean()
+      .exec();
 
     const total = await Product.countDocuments(filter);
 
@@ -65,7 +65,6 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST: Create a new product (Admin only)
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

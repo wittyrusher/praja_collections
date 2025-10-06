@@ -2,7 +2,7 @@ import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 import connectDB from './db';
-import User from '../models/User';
+import User from '@/models/User';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -19,9 +19,11 @@ export const authOptions: NextAuthOptions = {
 
         await connectDB();
 
-        const user = await User.findOne({ email: credentials.email }).select(
-          '+password'
-        );
+        // Fix: Properly type the query
+        const user = await User.findOne({ email: credentials.email })
+          .select('+password')
+          .lean()
+          .exec();
 
         if (!user) {
           throw new Error('Invalid email or password');

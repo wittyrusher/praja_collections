@@ -1,7 +1,21 @@
-import mongoose, { Schema, models } from 'mongoose';
-import { IProduct } from '../types/product';
+import mongoose, { Document, Model } from 'mongoose';
 
-const ProductSchema = new Schema<IProduct>(
+export interface IProduct extends Document {
+  name: string;
+  description: string;
+  price: number;
+  discountPrice?: number;
+  category: string;
+  images: string[];
+  stock: number;
+  sizes?: string[];
+  colors?: string[];
+  featured: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const ProductSchema = new mongoose.Schema<IProduct>(
   {
     name: {
       type: String,
@@ -53,11 +67,10 @@ const ProductSchema = new Schema<IProduct>(
   }
 );
 
-// Index for faster queries
 ProductSchema.index({ name: 'text', description: 'text' });
 ProductSchema.index({ category: 1 });
 ProductSchema.index({ price: 1 });
 
-const Product = models.Product || mongoose.model<IProduct>('Product', ProductSchema);
+const Product: Model<IProduct> = mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);
 
-export default Product;
+export default Product

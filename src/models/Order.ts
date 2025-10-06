@@ -1,7 +1,36 @@
-import mongoose, { Schema, models } from 'mongoose';
-import { IOrder } from '../types/order';
+import mongoose, { Document, Model } from 'mongoose';
 
-const OrderSchema = new Schema<IOrder>(
+export interface IOrder extends Document {
+  userId: string;
+  items: Array<{
+    product: any;
+    quantity: number;
+    price: number;
+    size?: string;
+    color?: string;
+  }>;
+  totalAmount: number;
+  shippingAddress: {
+    name: string;
+    phone: string;
+    street: string;
+    city: string;
+    state: string;
+    pincode: string;
+    country: string;
+  };
+  paymentInfo: {
+    razorpayOrderId: string;
+    razorpayPaymentId?: string;
+    razorpaySignature?: string;
+    paymentStatus: 'pending' | 'completed' | 'failed';
+  };
+  orderStatus: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const OrderSchema = new mongoose.Schema<IOrder>(
   {
     userId: {
       type: String,
@@ -10,7 +39,7 @@ const OrderSchema = new Schema<IOrder>(
     items: [
       {
         product: {
-          type: Schema.Types.ObjectId,
+          type: mongoose.Schema.Types.ObjectId,
           ref: 'Product',
           required: true,
         },
@@ -61,6 +90,6 @@ const OrderSchema = new Schema<IOrder>(
   }
 );
 
-const Order = models.Order || mongoose.model<IOrder>('Order', OrderSchema);
+const Order: Model<IOrder> = mongoose.models.Order || mongoose.model<IOrder>('Order', OrderSchema);
 
 export default Order;

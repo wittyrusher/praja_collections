@@ -76,8 +76,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen flex items-center justify-center bg-black py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 bg-amber-400  p-8 rounded-lg shadow-lg">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Sign in to your account
@@ -86,7 +86,7 @@ export default function LoginPage() {
             Or{' '}
             <Link
               href="/register"
-              className="font-medium text-primary-600 hover:text-primary-500"
+              className="font-medium text-blue-600 hover:text-primary-500"
             >
               create a new account
             </Link>
@@ -144,13 +144,13 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <Button type="submit" className="w-full" isLoading={isLoading}>
+          <Button type="submit" className="w-full  bg-blue-600 p-5 rounded-lg shadow-lg   " isLoading={isLoading}>
             Sign in
           </Button>
         </form>
 
         {/* Demo Credentials */}
-        <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+        <div className="mt-4 p-4 bg-white-50 rounded-lg">
           <p className="text-sm text-blue-800 font-semibold mb-2">Demo Credentials:</p>
           <p className="text-xs text-blue-700">Admin: admin@praja-collections.com / Admin@123</p>
           <p className="text-xs text-blue-700">User: user@example.com / User@123</p>
