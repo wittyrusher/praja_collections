@@ -4,6 +4,9 @@ import HeroBanner from '../components/HeroBanner';
 import ProductGrid from '../components/ProductGrid';
 import { IProduct } from '../types/product';
 
+// Force dynamic rendering to avoid build-time fetch errors
+export const dynamic = 'force-dynamic';
+
 async function getFeaturedProducts(): Promise<IProduct[]> {
   try {
     const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
@@ -79,8 +82,8 @@ export default async function HomePage() {
 
       {/* Features Section */}
       <section className="container mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 bg-white  p-8 rounded-lg shadow-md">
-          <div className="text-center bg-amber-900  p-4 rounded-lg    " >
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 bg-white p-8 rounded-lg shadow-md">
+          <div className="text-center bg-amber-900 p-4 rounded-lg">
             <div className="bg-primary-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg 
                 className="w-8 h-8 text-primary-600"
@@ -96,13 +99,13 @@ export default async function HomePage() {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold mb-2">Quality Products</h3>
-            <p className="text-gray-900">
+            <h3 className="text-xl font-semibold mb-2 text-white">Quality Products</h3>
+            <p className="text-gray-200">
               We ensure all products meet our high quality standards
             </p>
           </div>
 
-          <div className="text-center bg-amber-900  p-4 rounded-lg    ">
+          <div className="text-center bg-amber-900 p-4 rounded-lg">
             <div className="bg-primary-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg
                 className="w-8 h-8 text-primary-600"
@@ -118,13 +121,13 @@ export default async function HomePage() {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold mb-2">Best Prices</h3>
-            <p className="text-gray-900">
+            <h3 className="text-xl font-semibold mb-2 text-white">Best Prices</h3>
+            <p className="text-gray-200">
               Competitive pricing with regular discounts and offers
             </p>
           </div>
 
-          <div className="text-center bg-amber-900  p-4 rounded-lg    ">
+          <div className="text-center bg-amber-900 p-4 rounded-lg">
             <div className="bg-primary-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg
                 className="w-8 h-8 text-primary-600"
@@ -140,8 +143,8 @@ export default async function HomePage() {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold mb-2">Fast Delivery</h3>
-            <p className="text-gray-900">
+            <h3 className="text-xl font-semibold mb-2 text-white">Fast Delivery</h3>
+            <p className="text-gray-200">
               Quick and reliable delivery to your doorstep
             </p>
           </div>

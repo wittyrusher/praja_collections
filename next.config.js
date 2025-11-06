@@ -8,9 +8,7 @@ const nextConfig = {
       },
     ],
   },
-  experimental: {
-    serverActions: true,
-  },
+  // Remove experimental.serverActions - it's enabled by default now
 }
 
 module.exports = nextConfig
