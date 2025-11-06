@@ -1,14 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import Input from '../../components/ui/Input';
-import Button from '../../components/ui/Button';
+import Input from '@/components/ui/Input';
+import Button from '@/components/ui/Button';
 import toast from 'react-hot-toast';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect') || '/';
@@ -77,7 +77,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-amber-400  p-8 rounded-lg shadow-lg">
+      <div className="max-w-md w-full space-y-8 bg-amber-400 p-8 rounded-lg shadow-lg">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Sign in to your account
@@ -86,7 +86,7 @@ export default function LoginPage() {
             Or{' '}
             <Link
               href="/register"
-              className="font-medium text-blue-600 hover:text-primary-500"
+              className="font-medium text-blue-600 hover:text-blue-500"
             >
               create a new account
             </Link>
@@ -135,27 +135,50 @@ export default function LoginPage() {
             </div>
 
             <div className="text-sm">
-              <a
+              <Link
                 href="#"
-                className="font-medium text-primary-600 hover:text-primary-500"
+                className="font-medium text-blue-600 hover:text-blue-500"
               >
                 Forgot password?
-              </a>
+              </Link>
             </div>
           </div>
 
-          <Button type="submit" className="w-full  bg-blue-600 p-5 rounded-lg shadow-lg   " isLoading={isLoading}>
+          <Button 
+            type="submit" 
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg shadow-lg" 
+            isLoading={isLoading}
+          >
             Sign in
           </Button>
         </form>
 
         {/* Demo Credentials */}
-        <div className="mt-4 p-4 bg-white-50 rounded-lg">
+        <div className="mt-4 p-4 bg-white rounded-lg">
           <p className="text-sm text-blue-800 font-semibold mb-2">Demo Credentials:</p>
-          <p className="text-xs text-blue-700">Admin: admin@praja-collections.com / Admin@123</p>
-          <p className="text-xs text-blue-700">User: user@example.com / User@123</p>
+          <div className="space-y-1">
+            <p className="text-xs text-blue-700">
+              <strong>Admin:</strong> admin@praja-collections.com / Admin@123
+            </p>
+            <p className="text-xs text-blue-700">
+              <strong>User:</strong> pranavpande2609@gmail.com / (your password)
+            </p>
+          </div>
         </div>
       </div>
     </div>
+  );
+}
+
+// Export with Suspense wrapper
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

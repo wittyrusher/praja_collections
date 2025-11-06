@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Upload, X, ArrowLeft } from 'lucide-react';
@@ -24,7 +24,7 @@ interface ProductFormData {
   featured: boolean;
 }
 
-export default function AddProductPage() {
+function AddProductForm() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -554,5 +554,14 @@ export default function AddProductPage() {
         </div>
       </form>
     </div>
+  );
+}
+
+// Wrap with Suspense
+export default function AddProductPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-8">Loading...</div>}>
+      <AddProductForm />
+    </Suspense>
   );
 }

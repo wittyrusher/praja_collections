@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import ProductGrid from '../../components/ProductGrid';
-import CategoryFilter from '../../components/CategoryFilter';
-import Loading from '../../components/ui/Loading';
-import { IProduct } from '../../types/product';
+import ProductGrid from '@/components/ProductGrid';
+import CategoryFilter from '@/components/CategoryFilter';
+import Loading from '@/components/ui/Loading';
+import { IProduct } from '@/types/product';
 
-export default function ProductsPage() {
+function ProductsContent() {
   const searchParams = useSearchParams();
   const [products, setProducts] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,40 +47,13 @@ export default function ProductsPage() {
       <h1 className="text-3xl font-bold mb-8">All Products</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* Sidebar Filters */}
         <div className="lg:col-span-1">
           <CategoryFilter />
-
-          {/* Price Filter */}
-          <div className="bg-gray-900 p-4 rounded-lg shadow-md mt-4">
-            <h3 className="font-semibold text-lg mb-4">Price Range</h3>
-            <div className="space-y-2">
-              <label className="flex items-center space-x-2">
-                <input type="checkbox" className="rounded" />
-                <span className="text-sm">Under ₹500</span>
-              </label>
-              <label className="flex items-center space-x-2">
-                <input type="checkbox" className="rounded" />
-                <span className="text-sm">₹500 - ₹1000</span>
-              </label>
-              <label className="flex items-center space-x-2">
-                <input type="checkbox" className="rounded" />
-                <span className="text-sm">₹1000 - ₹2000</span>
-              </label>
-              <label className="flex items-center space-x-2">
-                <input type="checkbox" className="rounded" />
-                <span className="text-sm">Above ₹2000</span>
-              </label>
-            </div>
-          </div>
         </div>
 
-        {/* Products Grid */}
         <div className="lg:col-span-3">
           <div className="flex items-center justify-between mb-6">
-            <p className="text-gray-600">
-              Showing {products.length} products
-            </p>
+            <p className="text-gray-600">Showing {products.length} products</p>
             <select className="border rounded-lg px-4 py-2">
               <option>Sort by: Featured</option>
               <option>Price: Low to High</option>
@@ -91,7 +64,6 @@ export default function ProductsPage() {
 
           <ProductGrid products={products} />
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex justify-center mt-8 space-x-2">
               <button
@@ -126,5 +98,13 @@ export default function ProductsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<Loading text="Loading products..." />}>
+      <ProductsContent />
+    </Suspense>
   );
 }
