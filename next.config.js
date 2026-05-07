@@ -8,7 +8,8 @@ const nextConfig = {
       },
     ],
   },
-  // Remove experimental.serverActions - it's enabled by default now
+  // Enable standalone output for Docker
+  output: 'standalone',
 }
 
 module.exports = nextConfig

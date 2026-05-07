@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, Heart } from 'lucide-react';
+import { ShoppingBag, Heart, Bell, Star } from 'lucide-react';
 import { IProduct } from '../types/product';
 import { formatCurrency, calculateDiscount } from '../utils/helpers';
 import { useCart } from '../context/CartContext';
@@ -15,16 +15,12 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();
+  const [wishlisted, setWishlisted] = React.useState(false);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
-    if (product.stock === 0) {
-      toast.error('Product is out of stock');
-      return;
-    }
-
+    if (product.stock === 0) return;
     addToCart({
       productId: product._id,
       name: product.name,
@@ -33,6 +29,14 @@ export default function ProductCard({ product }: ProductCardProps) {
       image: product.images[0],
       stock: product.stock,
     });
+    toast.success('Added to cart');
+  };
+
+  const handleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setWishlisted((v) => !v);
+    toast.success(wishlisted ? 'Removed from wishlist' : 'Added to wishlist');
   };
 
   const discount = product.discountPrice
@@ -40,74 +44,85 @@ export default function ProductCard({ product }: ProductCardProps) {
     : 0;
 
   return (
-    <Link href={`/products/${product._id}`}>
-      <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
-        {/* Image Container */}
-        <div className="relative aspect-square overflow-hidden bg-gray-100">
+    <Link href={`/products/${product._id}`} className="group block">
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden transition-all duration-300 hover:border-gray-300 hover:-translate-y-1">
+
+        {/* Image */}
+        <div className="relative aspect-square overflow-hidden bg-gray-50">
           <Image
             src={product.images[0] || '/placeholder-product.jpg'}
             alt={product.name}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
           />
-          
-          {/* Discount Badge */}
+
           {discount > 0 && (
-            <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-md text-sm font-semibold">
+            <span className="absolute top-2.5 left-2.5 bg-red-500 text-white text-[11px] font-semibold tracking-wide px-2 py-0.5 rounded-md">
               {discount}% OFF
-            </div>
+            </span>
           )}
 
-          {/* Stock Badge */}
           {product.stock === 0 && (
-            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-              <span className="bg-white text-gray-900 px-4 py-2 rounded-md font-semibold">
-                Out of Stock
+            <div className="absolute inset-0 bg-black/45 flex items-center justify-center">
+              <span className="bg-white text-gray-900 text-xs font-semibold px-4 py-1.5 rounded-lg">
+                Out of stock
               </span>
             </div>
           )}
 
-          {/* Wishlist Button */}
           <button
-            className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition opacity-0 group-hover:opacity-100"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              toast.success('Added to wishlist');
-            }}
+            onClick={handleWishlist}
+            aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+            className="absolute top-2.5 right-2.5 w-8 h-8 bg-white border border-gray-200 rounded-full flex items-center justify-center transition hover:bg-gray-50"
           >
-            <Heart className="w-5 h-5 text-gray-600" />
+            <Heart
+              className={`w-4 h-4 transition-colors ${wishlisted ? 'fill-red-500 stroke-red-500' : 'stroke-gray-500'
+                }`}
+            />
           </button>
         </div>
 
-        {/* Product Info */}
-        <div className="p-4">
-          <p className="text-sm text-gray-500 mb-1">{product.category}</p>
-          <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 min-h-[3rem]">
+        {/* Body */}
+        <div className="px-4 pt-3.5 pb-4">
+          <p className="text-[11px] font-medium tracking-widest uppercase text-gray-400 mb-1">
+            {product.category}
+          </p>
+
+          <h3 className="font-serif font-light text-[15px] leading-snug text-gray-900 mb-3 line-clamp-2 min-h-[40px]">
             {product.name}
           </h3>
 
-          {/* Price */}
-          <div className="flex items-center space-x-2 mb-3">
-            <span className="text-xl font-bold text-gray-900">
+          <div className="flex items-baseline gap-2 mb-3">
+            <span className="text-[18px] font-semibold text-gray-900">
               {formatCurrency(product.discountPrice || product.price)}
             </span>
             {product.discountPrice && (
-              <span className="text-sm text-gray-500 line-through">
+              <span className="text-[13px] text-gray-400 line-through">
                 {formatCurrency(product.price)}
               </span>
             )}
           </div>
 
-          {/* Add to Cart Button */}
-          <button
-            onClick={handleAddToCart}
-            disabled={product.stock === 0}
-            className="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-          >
-            <ShoppingCart className="w-4 h-4" />
-            <span>{product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}</span>
-          </button>
+          {product.stock === 0 ? (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                toast.success('We&apos;ll notify you when its back!');
+              }}
+              className="w-full flex items-center justify-center gap-2 py-2 rounded-xl border border-gray-200 text-[13px] font-medium text-gray-400 hover:bg-gray-50 transition"
+            >
+              <Bell className="w-4 h-4" />
+              Notify me
+            </button>
+          ) : (
+            <button
+              onClick={handleAddToCart}
+              className="w-full flex items-center justify-center gap-2 py-2 rounded-xl border border-gray-200 text-[13px] font-medium text-gray-900 opacity-85 translate-y-0.5 group-hover:opacity-100 group-hover:translate-y-0 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200"
+            >
+              <ShoppingBag className="w-4 h-4" />
+              Add to cart
+            </button>
+          )}
         </div>
       </div>
     </Link>
