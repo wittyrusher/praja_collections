@@ -1,11 +1,11 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI!;
+// Use environment variable or default for Docker
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/praja-collections';
 
-if (!MONGODB_URI) {
-  throw new Error(
-    'Please define the MONGODB_URI environment variable inside .env.local'
-  );
+// Only throw error at runtime, not during build
+if (!process.env.MONGODB_URI && process.env.NODE_ENV === 'production' && typeof window === 'undefined') {
+  console.warn('⚠️ MONGODB_URI not set, using default connection string');
 }
 
 interface MongooseCache {
@@ -36,6 +36,9 @@ async function connectDB(): Promise<typeof mongoose> {
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
       console.log('✅ MongoDB Connected');
       return mongoose;
+    }).catch((error) => {
+      console.error('❌ MongoDB Connection Error:', error);
+      throw error;
     });
   }
 

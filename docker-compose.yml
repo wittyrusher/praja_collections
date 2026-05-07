@@ -1,0 +1,46 @@
+services:
+  # MongoDB Service
+  mongodb:
+    image: mongo:7.0
+    container_name: praja-mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: praja-collections
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - praja-network
+
+  # Next.js Application Service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-rzp_test_dummy}
+        RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-dummy_secret}
+    container_name: praja-app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongodb:27017/praja-collections
+      - NEXTAUTH_SECRET=your-super-secret-key-change-this-in-production
+      - NEXTAUTH_URL=http://localhost:3000
+      - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID:-rzp_test_dummy}
+      - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET:-dummy_secret}
+    depends_on:
+      - mongodb
+    networks:
+      - praja-network
+
+networks:
+  praja-network:
+    driver: bridge
+
+volumes:
+  mongodb-data:
+    driver: local
