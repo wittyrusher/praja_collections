@@ -14,18 +14,15 @@ export async function GET(request: NextRequest) {
     const minPrice = searchParams.get('minPrice');
     const maxPrice = searchParams.get('maxPrice');
     const featured = searchParams.get('featured');
+    const sort = searchParams.get('sort') || 'featured';
     const limit = parseInt(searchParams.get('limit') || '20');
     const page = parseInt(searchParams.get('page') || '1');
 
     const filter: any = {};
 
-    if (category) {
-      filter.category = category;
-    }
+    if (category) filter.category = category;
 
-    if (search) {
-      filter.$text = { $search: search };
-    }
+    if (search) filter.$text = { $search: search };
 
     if (minPrice || maxPrice) {
       filter.price = {};
@@ -33,14 +30,19 @@ export async function GET(request: NextRequest) {
       if (maxPrice) filter.price.$lte = parseFloat(maxPrice);
     }
 
-    if (featured === 'true') {
-      filter.featured = true;
-    }
+    if (featured === 'true') filter.featured = true;
+
+    const sortMap: Record<string, { [key: string]: 1 | -1 }> = {
+      price_asc: { price: 1 },
+      price_desc: { price: -1 },
+      newest: { createdAt: -1 },
+      featured: { featured: -1, createdAt: -1 },
+    };
 
     const skip = (page - 1) * limit;
 
     const products = await Product.find(filter)
-      .sort({ createdAt: -1 })
+      .sort(sortMap[sort] || sortMap.featured)
       .limit(limit)
       .skip(skip)
       .lean()
