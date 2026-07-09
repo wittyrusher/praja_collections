@@ -32,23 +32,23 @@ async function setupDatabase() {
 
     // Create Admin User
     console.log('🔄 Creating admin user...');
-    const existingAdmin = await User.findOne({ email: 'admin@praja-collections.com' });
+    const existingAdmin = await User.findOne({ email: 'admin@example.com' });
     
     if (existingAdmin) {
       console.log('⚠️  Admin user already exists');
-      console.log('   Email: admin@praja-collections.com\n');
+      console.log('   Email: admin@example.com\n');
     } else {
-      const hashedPassword = await bcrypt.hash('Admin@123', 10);
+      const hashedPassword = await bcrypt.hash('Password@123', 10);
       const admin = await User.create({
         name: 'Admin User',
-        email: 'admin@praja-collections.com',
+        email: 'admin@example.com',
         password: hashedPassword,
         role: 'admin',
         phone: '9876543210',
       });
       console.log('✅ Admin user created successfully!');
-      console.log('   Email: admin@praja-collections.com');
-      console.log('   Password: Admin@123');
+      console.log('   Email: admin@example.com');
+      console.log('   Password: Password@123');
       console.log('   ID:', admin._id.toString(), '\n');
     }
 
@@ -81,8 +81,8 @@ async function setupDatabase() {
     console.log('🔐 Login Credentials:');
     console.log('┌─────────────────────────────────────────────┐');
     console.log('│ ADMIN LOGIN:                                │');
-    console.log('│ Email: admin@praja-collections.com          │');
-    console.log('│ Password: Admin@123                         │');
+    console.log('│ Email: admin@example.com                    │');
+    console.log('│ Password: Password@123                      │');
     console.log('└─────────────────────────────────────────────┘');
     console.log('\n🌐 Next Steps:');
     console.log('   1. Run: npm run dev');

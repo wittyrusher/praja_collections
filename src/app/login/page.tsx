@@ -158,7 +158,7 @@ function LoginForm() {
           <p className="text-sm text-blue-800 font-semibold mb-2">Demo Credentials:</p>
           <div className="space-y-1">
             <p className="text-xs text-blue-700">
-              <strong>Admin:</strong> admin@praja-collections.com / Admin@123
+              <strong>Admin:</strong> admin@example.com / Password@123
             </p>
             <p className="text-xs text-blue-700">
               <strong>User:</strong> pranavpande2609@gmail.com / (your password)

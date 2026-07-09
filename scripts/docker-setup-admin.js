@@ -19,13 +19,13 @@ async function setupAdmin() {
     await mongoose.connect(MONGODB_URI);
     console.log('Connected to MongoDB');
 
-    const hashedPassword = await bcrypt.hash('Admin@123', 10);
+    const hashedPassword = await bcrypt.hash('Password@123', 10);
     
     await User.findOneAndUpdate(
-      { email: 'admin@praja-collections.com' },
+      { email: 'admin@example.com' },
       {
         name: 'Admin User',
-        email: 'admin@praja-collections.com',
+        email: 'admin@example.com',
         password: hashedPassword,
         role: 'admin',
         phone: '9876543210',
@@ -34,8 +34,8 @@ async function setupAdmin() {
     );
 
     console.log('✅ Admin user created/updated');
-    console.log('Email: admin@praja-collections.com');
-    console.log('Password: Admin@123');
+    console.log('Email: admin@example.com');
+    console.log('Password: Password@123');
 
   } catch (error) {
     console.error('Error:', error);
