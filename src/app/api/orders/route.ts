@@ -5,33 +5,18 @@ import Product from '../../../models/Product';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../lib/auth';
 
-// GET: Fetch user orders
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-
     if (!session) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     await connectDB();
 
-    const searchParams = request.nextUrl.searchParams;
-    const status = searchParams.get('status');
-
-    const filter: any = {};
-
-    // Admin can see all orders, users only their own
-    if (session.user.role !== 'admin') {
-      filter.userId = session.user.id;
-    }
-
-    if (status) {
-      filter.orderStatus = status;
-    }
+    const status = request.nextUrl.searchParams.get('status');
+    const filter: any = session.user.role !== 'admin' ? { userId: session.user.id } : {};
+    if (status) filter.orderStatus = status;
 
     const orders = await Order.find(filter)
       .populate('items.product')
@@ -39,31 +24,26 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, orders });
   } catch (error: any) {
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
 
-// POST: Create new order
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-
     if (!session) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     await connectDB();
 
-    const { items, shippingAddress, razorpayOrderId } = await request.json();
+    const { items, shippingAddress, paymentMethod, razorpayOrderId, couponCode } =
+      await request.json();
 
-    // Validate stock and calculate total
-    let totalAmount = 0;
+    const isCOD = paymentMethod === 'cod';
+
+    // Validate stock and compute total
+    let subtotal = 0;
     for (const item of items) {
       const product = await Product.findById(item.product);
       if (!product) {
@@ -78,36 +58,41 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-      totalAmount += item.price * item.quantity;
+      subtotal += item.price * item.quantity;
     }
 
-    // Create order
+    let shipping = subtotal > 999 ? 0 : 50;
+    if (couponCode === 'prajafreedel') {
+      shipping = 0;
+    }
+    const tax = Math.round(subtotal * 0.18);
+    const totalAmount = subtotal + shipping + tax;
+
     const order = await Order.create({
       userId: session.user.id,
       items,
       totalAmount,
       shippingAddress,
       paymentInfo: {
-        razorpayOrderId,
+        // Only set razorpayOrderId when it's a real non-empty string
+        ...(razorpayOrderId ? { razorpayOrderId } : {}),
         paymentStatus: 'pending',
       },
+      orderStatus: 'pending',
     });
 
-    // Update product stock
-    for (const item of items) {
-      await Product.findByIdAndUpdate(item.product, {
-        $inc: { stock: -item.quantity },
-      });
+    // COD: deduct stock immediately — payment is guaranteed on delivery
+    // Razorpay: stock deducted in /api/payment/verify after signature check
+    if (isCOD) {
+      for (const item of items) {
+        await Product.findByIdAndUpdate(item.product, {
+          $inc: { stock: -item.quantity },
+        });
+      }
     }
 
-    return NextResponse.json(
-      { success: true, order },
-      { status: 201 }
-    );
+    return NextResponse.json({ success: true, order }, { status: 201 });
   } catch (error: any) {
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

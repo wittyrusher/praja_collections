@@ -108,8 +108,9 @@ export default function ProductDetailsPage() {
             <div className="relative aspect-square bg-stone-100 rounded-2xl overflow-hidden border border-stone-200 shadow-sm">
               <Image
                 src={product.images[selectedImage] || '/placeholder-product.jpg'}
-                alt={product.name}
+                alt={product.name || 'Product image'}
                 fill
+                sizes="(max-width: 768px) 100vw, 50vw"
                 className="object-cover"
               />
               {discount > 0 && (
@@ -135,8 +136,8 @@ export default function ProductDetailsPage() {
                     key={index}
                     onClick={() => setSelectedImage(index)}
                     className={`relative aspect-square bg-stone-100 rounded-xl overflow-hidden border-2 transition-all duration-150 ${selectedImage === index
-                        ? 'border-amber-500 shadow-md'
-                        : 'border-stone-200 hover:border-stone-400'
+                      ? 'border-amber-500 shadow-md'
+                      : 'border-stone-200 hover:border-stone-400'
                       }`}
                   >
                     <Image src={image} alt={`${product.name} ${index + 1}`} fill className="object-cover" />
@@ -197,8 +198,8 @@ export default function ProductDetailsPage() {
                       key={size}
                       onClick={() => setSelectedSize(size)}
                       className={`px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all duration-150 ${selectedSize === size
-                          ? 'border-stone-900 bg-stone-900 text-white shadow-md'
-                          : 'border-stone-200 text-stone-700 hover:border-stone-400 bg-white'
+                        ? 'border-stone-900 bg-stone-900 text-white shadow-md'
+                        : 'border-stone-200 text-stone-700 hover:border-stone-400 bg-white'
                         }`}
                     >
                       {size}
@@ -221,8 +222,8 @@ export default function ProductDetailsPage() {
                       key={color}
                       onClick={() => setSelectedColor(color)}
                       className={`px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all duration-150 ${selectedColor === color
-                          ? 'border-stone-900 bg-stone-900 text-white shadow-md'
-                          : 'border-stone-200 text-stone-700 hover:border-stone-400 bg-white'
+                        ? 'border-stone-900 bg-stone-900 text-white shadow-md'
+                        : 'border-stone-200 text-stone-700 hover:border-stone-400 bg-white'
                         }`}
                     >
                       {color}
@@ -274,8 +275,8 @@ export default function ProductDetailsPage() {
               <button
                 onClick={() => setWishlisted((w) => !w)}
                 className={`w-14 h-14 flex items-center justify-center rounded-xl border-2 transition-colors duration-150 ${wishlisted
-                    ? 'bg-red-50 border-red-300 text-red-500'
-                    : 'bg-white border-stone-200 text-stone-400 hover:border-red-300 hover:text-red-400'
+                  ? 'bg-red-50 border-red-300 text-red-500'
+                  : 'bg-white border-stone-200 text-stone-400 hover:border-red-300 hover:text-red-400'
                   }`}
                 aria-label="Wishlist"
               >

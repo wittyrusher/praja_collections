@@ -31,7 +31,7 @@ export interface IShippingAddress {
 }
 
 export interface IPaymentInfo {
-  razorpayOrderId: string;
+  razorpayOrderId?: string;        // ← optional
   razorpayPaymentId?: string;
   razorpaySignature?: string;
   paymentStatus: PaymentStatus;

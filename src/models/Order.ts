@@ -20,7 +20,7 @@ export interface IOrder extends Document {
     country: string;
   };
   paymentInfo: {
-    razorpayOrderId: string;
+    razorpayOrderId?: string;        // ← optional
     razorpayPaymentId?: string;
     razorpaySignature?: string;
     paymentStatus: 'pending' | 'completed' | 'failed';
@@ -32,10 +32,7 @@ export interface IOrder extends Document {
 
 const OrderSchema = new mongoose.Schema<IOrder>(
   {
-    userId: {
-      type: String,
-      required: true,
-    },
+    userId: { type: String, required: true },
     items: [
       {
         product: {
@@ -43,23 +40,13 @@ const OrderSchema = new mongoose.Schema<IOrder>(
           ref: 'Product',
           required: true,
         },
-        quantity: {
-          type: Number,
-          required: true,
-          min: 1,
-        },
-        price: {
-          type: Number,
-          required: true,
-        },
+        quantity: { type: Number, required: true, min: 1 },
+        price: { type: Number, required: true },
         size: String,
         color: String,
       },
     ],
-    totalAmount: {
-      type: Number,
-      required: true,
-    },
+    totalAmount: { type: Number, required: true },
     shippingAddress: {
       name: { type: String, required: true },
       phone: { type: String, required: true },
@@ -70,7 +57,7 @@ const OrderSchema = new mongoose.Schema<IOrder>(
       country: { type: String, required: true },
     },
     paymentInfo: {
-      razorpayOrderId: { type: String, required: true },
+      razorpayOrderId: { type: String },          // ← required: false (omit = default)
       razorpayPaymentId: String,
       razorpaySignature: String,
       paymentStatus: {
@@ -85,11 +72,10 @@ const OrderSchema = new mongoose.Schema<IOrder>(
       default: 'pending',
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-const Order: Model<IOrder> = mongoose.models.Order || mongoose.model<IOrder>('Order', OrderSchema);
+const Order: Model<IOrder> =
+  mongoose.models.Order || mongoose.model<IOrder>('Order', OrderSchema);
 
 export default Order;

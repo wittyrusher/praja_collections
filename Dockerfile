@@ -28,8 +28,8 @@ ENV NODE_ENV=production
 ENV MONGODB_URI=mongodb://mongodb:27017/praja-collections
 ENV NEXTAUTH_SECRET=build-time-secret
 ENV NEXTAUTH_URL=http://localhost:3000
-ENV RAZORPAY_KEY_ID=rzp_test_dummy
-ENV RAZORPAY_KEY_SECRET=dummy_secret
+ENV RAZORPAY_KEY_ID=rzp_test_Suk6oqJ6pDpYWe
+ENV RAZORPAY_KEY_SECRET=92QN8XqolzX3P7DVwyg62sl9
 
 # Build Next.js application
 RUN npm run build

@@ -90,7 +90,7 @@ export default function CartPage() {
 
               <div className="divide-y divide-stone-100">
                 {cart.items.map((item) => (
-                  <div key={item.productId} className="px-6 py-4">
+                  <div key={`${item.productId}-${item.size}-${item.color}`} className="px-6 py-4">
                     <CartItem item={item} />
                   </div>
                 ))}

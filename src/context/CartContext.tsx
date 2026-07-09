@@ -36,24 +36,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [cart]);
 
   const addToCart = (item: ICartItem) => {
+    const existingItem = cart.items.find(
+      (i) => i.productId === item.productId && i.size === item.size && i.color === item.color
+    );
+
     setCart((prevCart) => {
-      const existingItem = prevCart.items.find(
+      const existing = prevCart.items.find(
         (i) => i.productId === item.productId && i.size === item.size && i.color === item.color
       );
 
       let newItems;
-      if (existingItem) {
-        // Update quantity if item exists
+      if (existing) {
         newItems = prevCart.items.map((i) =>
           i.productId === item.productId && i.size === item.size && i.color === item.color
             ? { ...i, quantity: i.quantity + item.quantity }
             : i
         );
-        toast.success('Item quantity updated');
       } else {
-        // Add new item
         newItems = [...prevCart.items, item];
-        toast.success('Item added to cart');
       }
 
       const totalItems = newItems.reduce((sum, i) => sum + i.quantity, 0);
@@ -61,6 +61,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
       return { items: newItems, totalItems, totalPrice };
     });
+
+    // ✅ Toast called outside the updater — no side effects inside setState
+    toast.success(existingItem ? 'Item quantity updated' : 'Item added to cart');
   };
 
   const removeFromCart = (productId: string) => {
@@ -68,10 +71,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const newItems = prevCart.items.filter((i) => i.productId !== productId);
       const totalItems = newItems.reduce((sum, i) => sum + i.quantity, 0);
       const totalPrice = newItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
-
-      toast.success('Item removed from cart');
       return { items: newItems, totalItems, totalPrice };
     });
+
+    // ✅ Toast called outside the updater
+    toast.success('Item removed from cart');
   };
 
   const updateQuantity = (productId: string, quantity: number) => {
@@ -86,7 +90,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       );
       const totalItems = newItems.reduce((sum, i) => sum + i.quantity, 0);
       const totalPrice = newItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
-
       return { items: newItems, totalItems, totalPrice };
     });
   };

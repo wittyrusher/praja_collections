@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingBag, Heart, Bell, Star } from 'lucide-react';
+import { ShoppingBag, Heart, Bell } from 'lucide-react';
 import { IProduct } from '../types/product';
 import { formatCurrency, calculateDiscount } from '../utils/helpers';
 import { useCart } from '../context/CartContext';
@@ -17,6 +17,17 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();
   const [wishlisted, setWishlisted] = React.useState(false);
 
+  // Safely resolve the image src — never undefined
+  const imageSrc: string =
+    Array.isArray(product.images) && product.images.length > 0 && product.images[0]
+      ? product.images[0]
+      : '/placeholder-product.jpg';
+
+  // Meaningful alt text for accessibility & SEO
+  const imageAlt = product.name
+    ? `${product.name} – ${product.category ?? 'product'} image`
+    : 'Product image';
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -26,7 +37,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       name: product.name,
       price: product.discountPrice || product.price,
       quantity: 1,
-      image: product.images[0],
+      image: imageSrc,
       stock: product.stock,
     });
     toast.success('Added to cart');
@@ -48,11 +59,13 @@ export default function ProductCard({ product }: ProductCardProps) {
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden transition-all duration-300 hover:border-gray-300 hover:-translate-y-1">
 
         {/* Image */}
+        {/* Parent must be position:relative for Next.js fill to work */}
         <div className="relative aspect-square overflow-hidden bg-gray-50">
           <Image
-            src={product.images[0] || '/placeholder-product.jpg'}
-            alt={product.name}
+            src={imageSrc}
+            alt={imageAlt}
             fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
           />
 
@@ -107,7 +120,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             <button
               onClick={(e) => {
                 e.preventDefault();
-                toast.success('We&apos;ll notify you when its back!');
+                toast.success("We'll notify you when it's back!");
               }}
               className="w-full flex items-center justify-center gap-2 py-2 rounded-xl border border-gray-200 text-[13px] font-medium text-gray-400 hover:bg-gray-50 transition"
             >
