@@ -13,6 +13,7 @@ export interface IUser extends Document {
     pincode: string;
     country: string;
   };
+  wishlist?: mongoose.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -53,6 +54,12 @@ const UserSchema = new mongoose.Schema<IUser>(
       pincode: String,
       country: String,
     },
+    wishlist: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
+      },
+    ],
   },
   {
     timestamps: true,

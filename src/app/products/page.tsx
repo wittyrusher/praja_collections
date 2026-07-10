@@ -67,13 +67,23 @@ function ProductsContent() {
         <div className="container mx-auto">
           <p className="text-amber-400 text-sm font-semibold uppercase tracking-widest mb-1">Shop</p>
           <h1
-            className="text-4xl font-bold text-white"
+            className="text-4xl font-bold text-white capitalize"
             style={{ letterSpacing: '-0.03em' }}
           >
-            All Products
+            {searchParams.get('search')
+              ? `Search Results`
+              : searchParams.get('newArrivals') === 'true'
+              ? 'New Arrivals'
+              : searchParams.get('sale') === 'true'
+              ? 'Seasonal Sale'
+              : searchParams.get('category')
+              ? `${searchParams.get('category')} Collection`
+              : 'All Products'}
           </h1>
-          <p className="text-stone-400 mt-2 text-sm">
-            Discover our full collection
+          <p className="text-black mt-2 text-sm">
+            {searchParams.get('search')
+              ? `Showing results for "${searchParams.get('search')}"`
+              : 'Discover our full collection'}
           </p>
         </div>
       </div>
@@ -102,10 +112,10 @@ function ProductsContent() {
             <div className="flex items-center justify-between mb-6 bg-white border border-stone-200 rounded-xl px-4 py-3 shadow-sm">
               <p className="text-stone-700 text-sm font-semibold">
                 <span className="text-stone-900 font-bold">{products.length}</span>
-                <span className="text-stone-500"> products found</span>
+                <span className="text-black"> products found</span>
               </p>
               <div className="flex items-center gap-2">
-                <label className="text-stone-500 text-xs font-medium uppercase tracking-wide hidden sm:block">
+                <label className="text-black text-xs font-medium uppercase tracking-wide hidden sm:block">
                   Sort
                 </label>
                 {/* value={currentSort} keeps the select in sync with the URL */}

@@ -26,6 +26,7 @@ export const ORDER_STATUS = [
   { value: 'shipped', label: 'Shipped', color: 'purple' },
   { value: 'delivered', label: 'Delivered', color: 'green' },
   { value: 'cancelled', label: 'Cancelled', color: 'red' },
+  { value: 'cancellation_pending', label: 'Cancellation Pending', color: 'red' },
 ];
 
 export const PAYMENT_STATUS = [

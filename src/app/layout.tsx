@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { CartProvider } from '../context/CartContext';
 import { AuthProvider } from '../context/AuthContext';
+import { WishlistProvider } from '../context/WishlistContext';
 import { Toaster } from 'react-hot-toast';
 import SessionProvider from '../components/SessionProvider';
 import Script from 'next/script';
@@ -27,14 +28,16 @@ export default function RootLayout({
       <body className={inter.className}>
         <SessionProvider>
           <AuthProvider>
-            <CartProvider>
-              <div className="flex flex-col min-h-screen">
-                <Navbar />
-                <main className="flex-grow">{children}</main>
-                <Footer />
-              </div>
-              <Toaster position="top-right" />
-            </CartProvider>
+            <WishlistProvider>
+              <CartProvider>
+                <div className="flex flex-col min-h-screen">
+                  <Navbar />
+                  <main className="flex-grow">{children}</main>
+                  <Footer />
+                </div>
+                <Toaster position="top-right" />
+              </CartProvider>
+            </WishlistProvider>
           </AuthProvider>
         </SessionProvider>
 

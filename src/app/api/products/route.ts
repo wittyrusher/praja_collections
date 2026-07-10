@@ -17,12 +17,20 @@ export async function GET(request: NextRequest) {
     const sort = searchParams.get('sort') || 'featured';
     const limit = parseInt(searchParams.get('limit') || '20');
     const page = parseInt(searchParams.get('page') || '1');
+    const newArrivals = searchParams.get('newArrivals');
+    const sale = searchParams.get('sale');
 
     const filter: any = {};
 
     if (category) filter.category = category;
 
-    if (search) filter.$text = { $search: search };
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { category: { $regex: search, $options: 'i' } },
+      ];
+    }
 
     if (minPrice || maxPrice) {
       filter.price = {};
@@ -31,6 +39,20 @@ export async function GET(request: NextRequest) {
     }
 
     if (featured === 'true') filter.featured = true;
+
+    if (sale === 'true') {
+      filter.discountPrice = { $exists: true, $gt: 0 };
+    }
+
+    if (newArrivals === 'true') {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      filter.createdAt = { $gte: thirtyDaysAgo };
+    }
+
+    if (sale === 'true') {
+      filter.discountPrice = { $exists: true, $gt: 0 };
+    }
 
     const sortMap: Record<string, { [key: string]: 1 | -1 }> = {
       price_asc: { price: 1 },

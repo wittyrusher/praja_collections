@@ -20,12 +20,15 @@ export interface IOrder extends Document {
     country: string;
   };
   paymentInfo: {
-    razorpayOrderId?: string;        // ← optional
+    razorpayOrderId?: string;
     razorpayPaymentId?: string;
     razorpaySignature?: string;
     paymentStatus: 'pending' | 'completed' | 'failed';
   };
-  orderStatus: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  orderStatus: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'cancellation_pending';
+  discount?: number;
+  shipping?: number;
+  couponCode?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -47,6 +50,9 @@ const OrderSchema = new mongoose.Schema<IOrder>(
       },
     ],
     totalAmount: { type: Number, required: true },
+    discount: { type: Number, default: 0 },
+    shipping: { type: Number, default: 0 },
+    couponCode: String,
     shippingAddress: {
       name: { type: String, required: true },
       phone: { type: String, required: true },
@@ -68,7 +74,7 @@ const OrderSchema = new mongoose.Schema<IOrder>(
     },
     orderStatus: {
       type: String,
-      enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
+      enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'cancellation_pending'],
       default: 'pending',
     },
   },

@@ -61,7 +61,7 @@ export default function CartItem({ item }: CartItemProps) {
           onClick={() => handleQuantityChange(item.quantity - 1)}
           disabled={item.quantity <= 1}
           aria-label="Decrease quantity"
-          className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="w-8 h-8 flex items-center justify-center text-black hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
           <Minus className="w-3.5 h-3.5" />
         </button>
@@ -74,7 +74,7 @@ export default function CartItem({ item }: CartItemProps) {
           onClick={() => handleQuantityChange(item.quantity + 1)}
           disabled={item.quantity >= item.stock}
           aria-label="Increase quantity"
-          className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="w-8 h-8 flex items-center justify-center text-black hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
           <Plus className="w-3.5 h-3.5" />
         </button>
@@ -91,7 +91,7 @@ export default function CartItem({ item }: CartItemProps) {
       <button
         onClick={() => removeFromCart(item.productId)}
         aria-label="Remove item"
-        className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors duration-150"
+        className="w-8 h-8 flex items-center justify-center rounded-lg text-black hover:text-red-600 hover:bg-red-50 transition-colors duration-150"
       >
         <Trash2 className="w-4 h-4" />
       </button>

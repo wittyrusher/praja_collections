@@ -21,6 +21,7 @@ export default function CheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [couponInput, setCouponInput] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState('');
+  const [couponDetails, setCouponDetails] = useState<{ discountType: string; discountValue: number; } | null>(null);
 
   // ── Guard redirects in useEffect — never call router.push during render ──────
   useEffect(() => {
@@ -37,11 +38,20 @@ export default function CheckoutPage() {
 
   const subtotal = cart.totalPrice;
   let shipping = subtotal > 999 ? 0 : 50;
-  if (appliedCoupon === 'prajafreedel') {
-    shipping = 0;
+
+  let discount = 0;
+  if (couponDetails) {
+    if (couponDetails.discountType === 'free_shipping') {
+      shipping = 0;
+    } else if (couponDetails.discountType === 'percentage') {
+      discount = Math.round(subtotal * (couponDetails.discountValue / 100));
+    } else if (couponDetails.discountType === 'fixed') {
+      discount = Math.min(couponDetails.discountValue, subtotal);
+    }
   }
-  const tax = Math.round(subtotal * 0.18);
-  const total = subtotal + shipping + tax;
+
+  const tax = Math.round((subtotal - discount) * 0.18);
+  const total = subtotal + shipping + tax - discount;
 
   const handleAddressSubmit = (address: IShippingAddress) => {
     setShippingAddress(address);
@@ -249,22 +259,37 @@ export default function CheckoutPage() {
                   <input
                     type="text"
                     value={couponInput}
-                    onChange={(e) => setCouponInput(e.target.value.toLowerCase())}
-                    placeholder="Enter code (e.g. prajafreedel)"
+                    onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                    placeholder="Enter coupon code"
                     disabled={!!appliedCoupon}
                     className="flex-1 bg-stone-950 border border-stone-800 rounded-lg px-3 py-2 text-sm text-white placeholder:text-stone-600 focus:outline-none focus:border-amber-500 disabled:opacity-50"
                   />
                   {!appliedCoupon ? (
                     <button
-                      onClick={() => {
-                        if (couponInput === 'prajafreedel') {
-                          setAppliedCoupon(couponInput);
-                          toast.success('Free delivery coupon applied!');
-                        } else if (couponInput) {
-                          toast.error('Invalid coupon code');
+                      onClick={async () => {
+                        const code = couponInput.trim();
+                        if (!code) return;
+
+                        try {
+                          const res = await fetch('/api/coupons/validate', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ code, orderAmount: subtotal }),
+                          });
+                          const data = await res.json();
+                          if (data.success) {
+                            setAppliedCoupon(data.coupon.code);
+                            setCouponDetails(data.coupon);
+                            toast.success(`Coupon "${data.coupon.code}" applied!`);
+                          } else {
+                            toast.error(data.message || 'Invalid coupon code');
+                          }
+                        } catch (err) {
+                          console.error(err);
+                          toast.error('Failed to validate coupon');
                         }
                       }}
-                      className="bg-stone-800 hover:bg-stone-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                      className="bg-stone-850 hover:bg-stone-800 border border-stone-800 text-amber-400 font-bold px-4 py-2 rounded-lg text-sm transition-colors"
                     >
                       Apply
                     </button>
@@ -272,6 +297,7 @@ export default function CheckoutPage() {
                     <button
                       onClick={() => {
                         setAppliedCoupon('');
+                        setCouponDetails(null);
                         setCouponInput('');
                         toast.success('Coupon removed');
                       }}
@@ -281,8 +307,13 @@ export default function CheckoutPage() {
                     </button>
                   )}
                 </div>
-                {appliedCoupon === 'prajafreedel' && (
-                  <p className="text-xs text-emerald-400 mt-2">✨ Free delivery applied!</p>
+                {appliedCoupon && (
+                  <p className="text-xs text-emerald-400 mt-2">
+                    ✨ Coupon &quot;{appliedCoupon.toUpperCase()}&quot; applied!
+                    {couponDetails && couponDetails.discountType === 'percentage' && ` (${couponDetails.discountValue}% off)`}
+                    {couponDetails && couponDetails.discountType === 'fixed' && ` (₹${couponDetails.discountValue} off)`}
+                    {couponDetails && couponDetails.discountType === 'free_shipping' && ' (Free shipping)'}
+                  </p>
                 )}
               </div>
 
@@ -299,6 +330,14 @@ export default function CheckoutPage() {
                     {shipping === 0 ? 'FREE' : formatCurrency(shipping)}
                   </span>
                 </div>
+                {discount > 0 && (
+                  <div className="flex justify-between text-sm text-emerald-400 font-medium">
+                    <span className="flex items-center gap-1.5">
+                      <Tag className="w-3.5 h-3.5" /> Discount
+                    </span>
+                    <span>-{formatCurrency(discount)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-sm">
                   <span className="text-stone-400 flex items-center gap-1.5">
                     <Tag className="w-3.5 h-3.5" /> GST (18%)

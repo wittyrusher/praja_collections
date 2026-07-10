@@ -7,7 +7,7 @@ import { authOptions } from '../../../../lib/auth';
 // GET: Fetch single order
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -20,8 +20,10 @@ export async function GET(
     }
 
     await connectDB();
+    
+    const { id } = await params;
 
-    const order = await Order.findById(params.id).populate('items.product');
+    const order = await Order.findById(id).populate('items.product');
 
     if (!order) {
       return NextResponse.json(
@@ -47,15 +49,14 @@ export async function GET(
   }
 }
 
-// PUT: Update order status (Admin only)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== 'admin') {
+    if (!session) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -65,12 +66,9 @@ export async function PUT(
     await connectDB();
 
     const { orderStatus } = await request.json();
+    const { id } = await params;
 
-    const order = await Order.findByIdAndUpdate(
-      params.id,
-      { orderStatus },
-      { new: true }
-    );
+    const order = await Order.findById(id);
 
     if (!order) {
       return NextResponse.json(
@@ -78,6 +76,34 @@ export async function PUT(
         { status: 404 }
       );
     }
+
+    const isAdmin = session.user.role === 'admin';
+    const isOwner = order.userId === session.user.id;
+
+    if (!isAdmin && !isOwner) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 403 }
+      );
+    }
+
+    if (!isAdmin) {
+      if (orderStatus !== 'cancellation_pending') {
+        return NextResponse.json(
+          { success: false, error: 'Unauthorized action' },
+          { status: 403 }
+        );
+      }
+      if (order.orderStatus === 'shipped' || order.orderStatus === 'delivered' || order.orderStatus === 'cancelled' || order.orderStatus === 'cancellation_pending') {
+        return NextResponse.json(
+          { success: false, error: 'Cannot request cancellation at this stage' },
+          { status: 400 }
+        );
+      }
+    }
+
+    order.orderStatus = orderStatus;
+    await order.save();
 
     return NextResponse.json({ success: true, order });
   } catch (error: any) {
