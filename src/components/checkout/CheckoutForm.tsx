@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapPin, ShieldCheck, CreditCard } from 'lucide-react';
 import { IShippingAddress } from '../../types/order';
+import toast from 'react-hot-toast';
 
 interface CheckoutFormProps {
   onSubmit: (address: IShippingAddress) => void;
@@ -79,6 +80,33 @@ export default function CheckoutForm({ onSubmit, isLoading }: CheckoutFormProps)
   });
 
   const [errors, setErrors] = useState<Partial<IShippingAddress>>({});
+  const [saveAddress, setSaveAddress] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Pre-fill user profile details if available
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const res = await fetch('/api/users/profile');
+        const data = await res.json();
+        if (data.success && data.user) {
+          const u = data.user;
+          setFormData({
+            name: u.name || '',
+            phone: u.phone || '',
+            street: u.address?.street || '',
+            city: u.address?.city || '',
+            state: u.address?.state || '',
+            pincode: u.address?.pincode || '',
+            country: u.address?.country || 'India',
+          });
+        }
+      } catch (err) {
+        console.error('Failed to load profile details:', err);
+      }
+    };
+    loadProfile();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -102,9 +130,42 @@ export default function CheckoutForm({ onSubmit, isLoading }: CheckoutFormProps)
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validate()) onSubmit(formData);
+    if (!validate()) return;
+
+    if (saveAddress) {
+      setIsSaving(true);
+      try {
+        const res = await fetch('/api/users/profile', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            phone: formData.phone,
+            address: {
+              street: formData.street,
+              city: formData.city,
+              state: formData.state,
+              pincode: formData.pincode,
+              country: formData.country,
+            },
+          }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          toast.success('Address saved for future orders!');
+        } else {
+          toast.error('Failed to save address for future orders');
+        }
+      } catch (err) {
+        console.error('Error saving profile:', err);
+        toast.error('Error saving address');
+      } finally {
+        setIsSaving(false);
+      }
+    }
+
+    onSubmit(formData);
   };
 
   return (
@@ -167,20 +228,35 @@ export default function CheckoutForm({ onSubmit, isLoading }: CheckoutFormProps)
         </div>
       </div>
 
+      {/* Checkbox for saving address */}
+      <div className="flex items-center gap-2 py-1">
+        <input
+          id="saveAddress"
+          name="saveAddress"
+          type="checkbox"
+          checked={saveAddress}
+          onChange={(e) => setSaveAddress(e.target.checked)}
+          className="h-4 w-4 bg-stone-950 border border-stone-800 rounded focus:ring-amber-500 text-amber-500 cursor-pointer"
+        />
+        <label htmlFor="saveAddress" className="text-xs text-stone-400 font-semibold cursor-pointer select-none">
+          Save this address for future orders
+        </label>
+      </div>
+
       {/* Submit */}
       <div className="space-y-3 pt-1">
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={isLoading || isSaving}
           className="w-full h-11 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-stone-900 text-sm font-semibold rounded-lg active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150"
         >
-          {isLoading ? (
+          {isLoading || isSaving ? (
             <>
               <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
               </svg>
-              Processing…
+              {isSaving ? 'Saving Address…' : 'Processing…'}
             </>
           ) : (
             <>

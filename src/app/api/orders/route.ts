@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '../../../lib/db';
-import Order from '../../../models/Order';
-import Product from '../../../models/Product';
+import Order from '@/models/Order';
+import Product from '@/models/Product';
+import Coupon from '@/models/Coupon';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../lib/auth';
 
@@ -62,16 +63,35 @@ export async function POST(request: NextRequest) {
     }
 
     let shipping = subtotal > 999 ? 0 : 50;
-    if (couponCode === 'prajafreedel') {
-      shipping = 0;
+    let discount = 0;
+
+    if (couponCode) {
+      const coupon = await Coupon.findOne({ code: couponCode.toUpperCase(), active: true });
+      if (coupon) {
+        const expiry = new Date(coupon.expiryDate);
+        expiry.setHours(23, 59, 59, 999);
+        if (expiry >= new Date() && subtotal >= coupon.minOrderAmount) {
+          if (coupon.discountType === 'free_shipping') {
+            shipping = 0;
+          } else if (coupon.discountType === 'percentage') {
+            discount = Math.round(subtotal * (coupon.discountValue / 100));
+          } else if (coupon.discountType === 'fixed') {
+            discount = Math.min(coupon.discountValue, subtotal);
+          }
+        }
+      }
     }
-    const tax = Math.round(subtotal * 0.18);
-    const totalAmount = subtotal + shipping + tax;
+
+    const tax = Math.round((subtotal - discount) * 0.18);
+    const totalAmount = subtotal + shipping + tax - discount;
 
     const order = await Order.create({
       userId: session.user.id,
       items,
       totalAmount,
+      discount,
+      shipping,
+      couponCode: couponCode ? couponCode.toUpperCase() : undefined,
       shippingAddress,
       paymentInfo: {
         // Only set razorpayOrderId when it's a real non-empty string

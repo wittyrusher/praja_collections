@@ -17,7 +17,7 @@ export default function CartPage() {
         <div className="container mx-auto px-4 py-24">
           <div className="max-w-md mx-auto text-center">
             <div className="w-28 h-28 mx-auto mb-8 rounded-full bg-stone-100 border-2 border-stone-200 flex items-center justify-center">
-              <ShoppingBag className="w-12 h-12 text-stone-400" strokeWidth={1.5} />
+              <ShoppingBag className="w-12 h-12 text-black" strokeWidth={1.5} />
             </div>
             <h2
               className="text-4xl font-bold text-stone-900 mb-3 tracking-tight"
@@ -25,7 +25,7 @@ export default function CartPage() {
             >
               Your cart is empty
             </h2>
-            <p className="text-stone-600 text-lg mb-10 leading-relaxed">
+            <p className="text-black text-lg mb-10 leading-relaxed">
               Looks like you haven't added anything yet. Browse our collection and find something you love.
             </p>
             <Link href="/products">
@@ -83,7 +83,7 @@ export default function CartPage() {
                 >
                   Items in your cart
                 </h2>
-                <span className="text-stone-500 text-sm font-medium">
+                <span className="text-black text-sm font-medium">
                   {cart.totalItems} {cart.totalItems === 1 ? 'item' : 'items'}
                 </span>
               </div>

@@ -10,6 +10,7 @@ import { formatCurrency, formatDate } from '../../utils/helpers';
 import Loading from '../../components/ui/Loading';
 import Button from '../../components/ui/Button';
 import { ORDER_STATUS } from '../../utils/constants';
+import PayNowButton from '../../components/checkout/PayNowButton';
 
 export default function OrdersPage() {
   const { data: session, status } = useSession();
@@ -50,7 +51,7 @@ export default function OrdersPage() {
     const statusObj = ORDER_STATUS.find((s) => s.value === status);
     const colors: any = {
       yellow: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-      blue: 'bg-white-100 text-blue-800 border-blue-300',
+      blue: 'bg-blue-100 text-blue-800 border-blue-300',
       purple: 'bg-purple-100 text-purple-800 border-purple-300',
       green: 'bg-green-100 text-green-800 border-green-300',
       red: 'bg-red-100 text-red-800 border-red-300',
@@ -69,19 +70,19 @@ export default function OrdersPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">My Orders</h1>
-        <p className="text-gray-600">Track and manage your orders</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">My Orders</h1>
+        <p className="text-gray-600 dark:text-gray-400">Track and manage your orders</p>
       </div>
 
       {/* Filter Tabs */}
-      <div className="bg-white rounded-lg shadow-md mb-6">
+      <div className="bg-white rounded-lg shadow-md mb-6 text-gray-900">
         <div className="flex overflow-x-auto">
           <button
             onClick={() => setFilterStatus('all')}
             className={`px-6 py-4 font-medium whitespace-nowrap border-b-2 transition ${
               filterStatus === 'all'
                 ? 'border-primary-600 text-primary-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
+                : 'border-transparent text-black hover:text-gray-900'
             }`}
           >
             All Orders ({orders.length})
@@ -93,7 +94,7 @@ export default function OrdersPage() {
               className={`px-6 py-4 font-medium whitespace-nowrap border-b-2 transition ${
                 filterStatus === status.value
                   ? 'border-primary-600 text-primary-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
+                  : 'border-transparent text-black hover:text-gray-900'
               }`}
             >
               {status.label}
@@ -106,12 +107,12 @@ export default function OrdersPage() {
       {loading ? (
         <Loading text="Loading orders..." />
       ) : orders.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-md p-12 text-center">
+        <div className="bg-white rounded-lg shadow-md p-12 text-center text-gray-900">
           <ShoppingBag className="w-20 h-20 mx-auto text-gray-300 mb-4" />
           <h3 className="text-xl font-semibold text-gray-900 mb-2">
             No orders found
           </h3>
-          <p className="text-gray-600 mb-6">
+          <p className="text-black mb-6">
             {filterStatus === 'all'
               ? "You haven't placed any orders yet"
               : `No ${filterStatus} orders found`}
@@ -125,7 +126,7 @@ export default function OrdersPage() {
           {orders.map((order) => (
             <div
               key={order._id}
-              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow text-gray-900"
             >
               {/* Order Header */}
               <div className="bg-gray-50 px-6 py-4 border-b flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -135,7 +136,7 @@ export default function OrdersPage() {
                     <p className="font-semibold text-gray-900">
                       Order #{order._id.slice(-8).toUpperCase()}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-black">
                       Placed on {formatDate(order.createdAt)}
                     </p>
                   </div>
@@ -176,7 +177,7 @@ export default function OrdersPage() {
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <Package className="w-8 h-8 text-gray-400" />
+                            <Package className="w-8 h-8 text-black" />
                           </div>
                         )}
                       </div>
@@ -186,7 +187,7 @@ export default function OrdersPage() {
                             ? item.product.name
                             : 'Product'}
                         </p>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-black">
                           Quantity: {item.quantity} • {formatCurrency(item.price)}
                         </p>
                       </div>
@@ -198,7 +199,7 @@ export default function OrdersPage() {
                     </div>
                   ))}
                   {order.items.length > 3 && (
-                    <p className="text-sm text-gray-600 text-center pt-2">
+                    <p className="text-sm text-black text-center pt-2">
                       +{order.items.length - 3} more item(s)
                     </p>
                   )}
@@ -207,7 +208,7 @@ export default function OrdersPage() {
 
               {/* Order Footer */}
               <div className="bg-gray-50 px-6 py-4 border-t flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-black">
                   <p>
                     <span className="font-medium">Payment:</span>{' '}
                     <span
@@ -228,10 +229,15 @@ export default function OrdersPage() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-gray-600">Total Amount</p>
+                  <p className="text-sm text-black">Total Amount</p>
                   <p className="text-2xl font-bold text-primary-600">
                     {formatCurrency(order.totalAmount)}
                   </p>
+                  {order.paymentInfo.paymentStatus === 'pending' && (
+                    <div className="mt-2 w-36 ml-auto">
+                      <PayNowButton orderId={order._id as string} amount={order.totalAmount} />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -242,12 +248,12 @@ export default function OrdersPage() {
       {/* Empty State for Filtered Results */}
       {!loading && orders.length === 0 && filterStatus !== 'all' && (
         <div className="text-center py-12">
-          <p className="text-gray-500">
+          <p className="text-gray-600 dark:text-gray-400">
             No orders with status "{filterStatus}" found
           </p>
           <button
             onClick={() => setFilterStatus('all')}
-            className="mt-4 text-primary-600 hover:text-primary-700 font-medium"
+            className="mt-4 text-primary-600 dark:text-primary-400 hover:underline font-medium"
           >
             View all orders
           </button>

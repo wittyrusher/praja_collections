@@ -7,6 +7,7 @@ import { ShoppingBag, Heart, Bell } from 'lucide-react';
 import { IProduct } from '../types/product';
 import { formatCurrency, calculateDiscount } from '../utils/helpers';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 import toast from 'react-hot-toast';
 
 interface ProductCardProps {
@@ -15,7 +16,8 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();
-  const [wishlisted, setWishlisted] = React.useState(false);
+  const { toggleWishlist, isInWishlist } = useWishlist();
+  const wishlisted = isInWishlist(product._id);
 
   // Safely resolve the image src — never undefined
   const imageSrc: string =
@@ -43,11 +45,10 @@ export default function ProductCard({ product }: ProductCardProps) {
     toast.success('Added to cart');
   };
 
-  const handleWishlist = (e: React.MouseEvent) => {
+  const handleWishlist = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setWishlisted((v) => !v);
-    toast.success(wishlisted ? 'Removed from wishlist' : 'Added to wishlist');
+    await toggleWishlist(product);
   };
 
   const discount = product.discountPrice
@@ -97,7 +98,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         {/* Body */}
         <div className="px-4 pt-3.5 pb-4">
-          <p className="text-[11px] font-medium tracking-widest uppercase text-gray-400 mb-1">
+          <p className="text-[11px] font-medium tracking-widest uppercase text-black mb-1">
             {product.category}
           </p>
 
@@ -110,7 +111,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               {formatCurrency(product.discountPrice || product.price)}
             </span>
             {product.discountPrice && (
-              <span className="text-[13px] text-gray-400 line-through">
+              <span className="text-[13px] text-black line-through">
                 {formatCurrency(product.price)}
               </span>
             )}
@@ -122,7 +123,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 e.preventDefault();
                 toast.success("We'll notify you when it's back!");
               }}
-              className="w-full flex items-center justify-center gap-2 py-2 rounded-xl border border-gray-200 text-[13px] font-medium text-gray-400 hover:bg-gray-50 transition"
+              className="w-full flex items-center justify-center gap-2 py-2 rounded-xl border border-gray-200 text-[13px] font-medium text-black hover:bg-gray-50 transition"
             >
               <Bell className="w-4 h-4" />
               Notify me

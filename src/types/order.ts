@@ -42,7 +42,8 @@ export type OrderStatus =
   | 'processing'
   | 'shipped'
   | 'delivered'
-  | 'cancelled';
+  | 'cancelled'
+  | 'cancellation_pending';
 
 export type PaymentStatus = 'pending' | 'completed' | 'failed';
 
