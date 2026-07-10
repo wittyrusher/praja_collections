@@ -1,7 +1,22 @@
+const path = require('path');
+try {
+  const { loadEnvConfig } = require('@next/env');
+  loadEnvConfig(path.join(__dirname, '..'));
+} catch (e) {
+  // Fallback
+}
+
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-const MONGODB_URI = 'mongodb://mongodb:27017/praja-collections';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+  throw new Error("Missing ADMIN_EMAIL or ADMIN_PASSWORD");
+}
+
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://mongodb:27017/praja-collections';
 
 const UserSchema = new mongoose.Schema({
   name: String,
@@ -36,13 +51,13 @@ async function setupAdminAndProducts() {
 
     // Create Admin User
     console.log('👤 Creating Admin User...');
-    const hashedPassword = await bcrypt.hash('Admin@123', 10);
+    const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
     
     const admin = await User.findOneAndUpdate(
-      { email: 'admin@praja-collections.com' },
+      { email: ADMIN_EMAIL },
       {
         name: 'Admin User',
-        email: 'admin@praja-collections.com',
+        email: ADMIN_EMAIL,
         password: hashedPassword,
         role: 'admin',
         phone: '9876543210',
@@ -52,8 +67,7 @@ async function setupAdminAndProducts() {
 
     console.log('✅ Admin user created!');
     console.log('─────────────────────────────────────');
-    console.log('   Email: admin@praja-collections.com');
-    console.log('   Password: Admin@123');
+    console.log(`   Email: ${ADMIN_EMAIL}`);
     console.log('─────────────────────────────────────\n');
 
     // Create Sample Products
@@ -111,7 +125,7 @@ async function setupAdminAndProducts() {
     console.log('🌐 Access your application:');
     console.log('   App: http://localhost:3000');
     console.log('   Admin: http://localhost:3000/admin');
-    console.log('   Login: admin@praja-collections.com / Admin@123\n');
+    console.log(`   Login: ${ADMIN_EMAIL} / [Configured ADMIN_PASSWORD]\n`);
 
   } catch (error) {
     console.error('❌ Error:', error);

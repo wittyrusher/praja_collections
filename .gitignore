@@ -78,6 +78,7 @@ temp/
 # Local Scripts / Scratch
 # =========================
 scratch/
+query
 
 # =========================
 # Prisma (if generated)

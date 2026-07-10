@@ -1,7 +1,22 @@
+const path = require('path');
+try {
+  const { loadEnvConfig } = require('@next/env');
+  loadEnvConfig(path.join(__dirname, '..'));
+} catch (e) {
+  // Fallback if not available
+}
+
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-const MONGODB_URI = 'mongodb://localhost:27017/praja-collections';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+  throw new Error("Missing ADMIN_EMAIL or ADMIN_PASSWORD");
+}
+
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/praja-collections';
 
 const UserSchema = new mongoose.Schema({
   name: String,
@@ -21,16 +36,16 @@ async function checkAdmin() {
     await mongoose.connect(MONGODB_URI);
 
     // Find admin user
-    const admin = await User.findOne({ email: 'admin@praja-collections.com' });
+    const admin = await User.findOne({ email: ADMIN_EMAIL });
 
     if (!admin) {
       console.log('❌ Admin user NOT FOUND!\n');
       console.log('Creating admin user now...\n');
 
-      const hashedPassword = await bcrypt.hash('Admin@123', 10);
+      const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
       const newAdmin = await User.create({
         name: 'Admin User',
-        email: 'admin@praja-collections.com',
+        email: ADMIN_EMAIL,
         password: hashedPassword,
         role: 'admin',
         phone: '9876543210',
@@ -53,16 +68,15 @@ async function checkAdmin() {
 
       // Test password
       console.log('🔐 Testing password...');
-      const testPassword = 'Admin@123';
-      const isMatch = await bcrypt.compare(testPassword, admin.password);
+      const isMatch = await bcrypt.compare(ADMIN_PASSWORD, admin.password);
 
       if (isMatch) {
         console.log('✅ Password is CORRECT!');
       } else {
         console.log('❌ Password is INCORRECT!');
-        console.log('\nResetting password to: Admin@123\n');
+        console.log('\nResetting password...\n');
 
-        const newHashedPassword = await bcrypt.hash('Admin@123', 10);
+        const newHashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
         await User.updateOne(
           { _id: admin._id },
           { password: newHashedPassword }
@@ -91,8 +105,8 @@ async function checkAdmin() {
 
     console.log('\n✅ Check completed!');
     console.log('\n🔐 Login with:');
-    console.log('   Email: admin@praja-collections.com');
-    console.log('   Password: Admin@123\n');
+    console.log(`   Email: ${ADMIN_EMAIL}`);
+    console.log('   Password: [Configured ADMIN_PASSWORD]\n');
 
   } catch (error) {
     console.error('❌ Error:', error);

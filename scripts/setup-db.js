@@ -1,8 +1,23 @@
+const path = require('path');
+try {
+  const { loadEnvConfig } = require('@next/env');
+  loadEnvConfig(path.join(__dirname, '..'));
+} catch (e) {
+  // Fallback
+}
+
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+  throw new Error("Missing ADMIN_EMAIL or ADMIN_PASSWORD");
+}
+
 // MongoDB connection
-const MONGODB_URI = 'mongodb://localhost:27017/praja-collections';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/praja-collections';
 
 // User Schema
 const UserSchema = new mongoose.Schema({
@@ -32,23 +47,22 @@ async function setupDatabase() {
 
     // Create Admin User
     console.log('🔄 Creating admin user...');
-    const existingAdmin = await User.findOne({ email: 'admin@praja-collections.com' });
+    const existingAdmin = await User.findOne({ email: ADMIN_EMAIL });
     
     if (existingAdmin) {
       console.log('⚠️  Admin user already exists');
-      console.log('   Email: admin@praja-collections.com\n');
+      console.log(`   Email: ${ADMIN_EMAIL}\n`);
     } else {
-      const hashedPassword = await bcrypt.hash('Admin@123', 10);
+      const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
       const admin = await User.create({
         name: 'Admin User',
-        email: 'admin@praja-collections.com',
+        email: ADMIN_EMAIL,
         password: hashedPassword,
         role: 'admin',
         phone: '9876543210',
       });
       console.log('✅ Admin user created successfully!');
-      console.log('   Email: admin@praja-collections.com');
-      console.log('   Password: Admin@123');
+      console.log(`   Email: ${ADMIN_EMAIL}`);
       console.log('   ID:', admin._id.toString(), '\n');
     }
 
@@ -81,8 +95,8 @@ async function setupDatabase() {
     console.log('🔐 Login Credentials:');
     console.log('┌─────────────────────────────────────────────┐');
     console.log('│ ADMIN LOGIN:                                │');
-    console.log('│ Email: admin@praja-collections.com          │');
-    console.log('│ Password: Admin@123                         │');
+    console.log(`│ Email: ${ADMIN_EMAIL.padEnd(36)} │`);
+    console.log('│ Password: [Configured ADMIN_PASSWORD]       │');
     console.log('└─────────────────────────────────────────────┘');
     console.log('\n🌐 Next Steps:');
     console.log('   1. Run: npm run dev');
