@@ -68,8 +68,9 @@ function LoginForm() {
         router.push(redirect);
         router.refresh();
       }
-    } catch (error: any) {
-      toast.error(error.message || 'Login failed');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Login failed';
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -144,9 +145,9 @@ function LoginForm() {
             </div>
           </div>
 
-          <Button 
-            type="submit" 
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg shadow-lg" 
+          <Button
+            type="submit"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg shadow-lg"
             isLoading={isLoading}
           >
             Sign in
@@ -158,7 +159,7 @@ function LoginForm() {
           <p className="text-sm text-blue-800 font-semibold mb-2">Demo Credentials:</p>
           <div className="space-y-1">
             <p className="text-xs text-blue-700">
-              <strong>User:</strong> pranavpande2609@gmail.com / (your password)
+              <strong>User:</strong> xyz@gmail.com / (xyz123)
             </p>
           </div>
         </div>
